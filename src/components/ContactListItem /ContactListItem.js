@@ -1,8 +1,10 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { getContacts, getLoading, getError } from 'redux/contactsSlice';
+import { useSelector } from 'react-redux';
 import { getFilter } from 'redux/filterSlice';
-import { deleteContact, fetchContacts } from 'redux/contactsOperations';
-import { useEffect } from 'react';
+// import { useEffect } from 'react';
+import {
+  useGetContactsQuery,
+  useDeleteContactMutation,
+} from '../../redux/contactsApi';
 
 import {
   ListItem,
@@ -12,15 +14,10 @@ import {
 } from './ContactListItem.styled';
 
 export const ContactListItem = () => {
-  const contacts = useSelector(getContacts);
+  const { data: contacts } = useGetContactsQuery();
+  const [deleteContact, delInfo] = useDeleteContactMutation();
+  // console.log(delInfo);
   const filter = useSelector(getFilter);
-  const dispatch = useDispatch();
-  const loading = useSelector(getLoading);
-  const error = useSelector(getError);
-
-  useEffect(() => {
-    dispatch(fetchContacts());
-  }, [dispatch]);
 
   const getFilteredContacts = () => {
     if (!contacts) return [];
@@ -29,21 +26,21 @@ export const ContactListItem = () => {
     );
   };
   const filteredContacts = getFilteredContacts();
-  if (loading) {
+  if (delInfo.isLoading) {
     return <h2>Loading...</h2>;
   }
 
-  if (error) {
-    return <h2>{error}</h2>;
+  if (delInfo.error) {
+    return <h2>{delInfo.error.message}</h2>;
   }
-  if (contacts.length > 0) {
+  if (contacts && contacts.length > 0) {
     return filteredContacts.map(contact => (
       <ListItem key={contact.id}>
         <ListItemWrapper>
           <ListItemInfo>
             {contact.name}: {contact.number}
           </ListItemInfo>
-          <ListItemButton onClick={() => dispatch(deleteContact(contact.id))}>
+          <ListItemButton onClick={() => deleteContact(contact.id)}>
             Delete
           </ListItemButton>
         </ListItemWrapper>

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getContacts } from 'redux/contactsSlice';
-import { addContact } from 'redux/contactsOperations';
-// import { nanoid } from 'nanoid';
+import {
+  useGetContactsQuery,
+  useAddContactMutation,
+} from '../../redux/contactsApi';
 import {
   ContactFormContainer,
   FormLabel,
@@ -11,10 +11,11 @@ import {
 } from './ContactForm.styled';
 
 export const ContactForm = () => {
+  const { data: contacts } = useGetContactsQuery();
+  // console.log(contacts);
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-  const contacts = useSelector(getContacts);
-  const dispatch = useDispatch();
+  const [addContact] = useAddContactMutation();
 
   const handleNameChange = event => {
     setName(event.target.value);
@@ -38,7 +39,7 @@ export const ContactForm = () => {
       alert(`${name} is already in contacts.`);
       return;
     }
-    dispatch(addContact(newContact));
+    addContact(newContact);
     setName('');
     setNumber('');
   };
